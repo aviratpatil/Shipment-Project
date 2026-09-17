@@ -1,56 +1,32 @@
-# 📦 Shipment Management System (Full-Stack Platform)
+# 📦 Shipment Management System (Backend API)
 
-A modern, production-ready full-stack logistics platform featuring a **React 19 + TypeScript + Vite** frontend and a robust **Node.js + Express + TypeScript + Prisma + PostgreSQL** backend API.
+A production-ready, enterprise-grade backend REST API for managing logistics, customers, shipments, and real-time status tracking. Built with **Node.js**, **Express**, **TypeScript**, **Prisma ORM**, **PostgreSQL**, **Zod**, and **JWT Authentication**.
 
 ---
 
 ## 📑 Table of Contents
 1. [Project Overview](#-project-overview)
-2. [Architecture & Monorepo Structure](#-architecture--monorepo-structure)
-3. [Tech Stack](#-tech-stack)
-4. [Quick Start Guide](#-quick-start-guide)
-5. [Frontend Overview](#-frontend-overview)
-6. [User Roles & Permissions (USER vs ADMIN)](#-user-roles--permissions-user-vs-admin)
-7. [Database Schema & Entity Relationships](#-database-schema--entity-relationships)
-8. [API Endpoints Reference](#-api-endpoints-reference)
+2. [User Roles & Permissions (USER vs ADMIN)](#-user-roles--permissions-user-vs-admin)
+3. [System Architecture (How It Works)](#-system-architecture-how-it-works)
+4. [Tech Stack](#-tech-stack)
+5. [Database Schema & Entity Relationships](#-database-schema--entity-relationships)
+6. [Complete Request Lifecycle (How Data Travels)](#-complete-request-lifecycle-how-data-travels)
+7. [API Endpoints Reference](#-api-endpoints-reference)
+8. [Setup & Installation Guide](#-setup--installation-guide)
 9. [Testing with Postman](#-testing-with-postman)
+10. [Folder Structure](#-folder-structure)
 
 ---
 
 ## 🌟 Project Overview
 
-The **Shipment Management System** is designed for modern logistics operations. It provides a complete web interface and RESTful API for shipping, dispatch, customer management, and freight tracking:
+The **Shipment Management System** is designed for modern logistics operations. It solves the everyday problems of a shipping and courier company:
 
-- **Interactive React Frontend**: Clean, high-contrast light theme dashboard with real-time operations overview, shipment dispatch dialogs, customer directory, and modal tracking inspect.
-- **Customer Directory**: Store and manage corporate and individual clients with soft-delete data protection.
+- **Customer Directory**: Store and manage corporate and individual clients.
 - **Shipment Lifecycle Tracking**: Monitor shipments across 5 distinct phases: `PENDING` ➔ `IN_TRANSIT` ➔ `OUT_FOR_DELIVERY` ➔ `DELIVERED` (or `CANCELLED`).
-- **Complete Audit Trail**: Every status update automatically records timestamps and history in a dedicated audit log (`ShipmentStatusHistory`).
-- **Strict Security & Validation**: JWT-based authentication with role-based permissions (`ADMIN` vs `USER`) and Zod request validation.
-
----
-
-## 🚀 Quick Start Guide
-
-### 1. Prerequisites
-- Node.js (v18+ recommended)
-- PostgreSQL database instance
-
-### 2. Backend Setup
-```bash
-cd backend
-npm install
-npx prisma migrate dev
-npm run dev
-# Backend runs at http://localhost:5000
-```
-
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-# Frontend runs at http://localhost:5173
-```
+- **Complete Audit Trail**: Every status change is automatically logged with exact timestamps in a dedicated audit log (`ShipmentStatusHistory`).
+- **Soft Deletes**: Clients are never permanently removed from disk to preserve data integrity and prevent broken shipment records.
+- **Strict Security & Validation**: Every single incoming payload is strictly validated via Zod schemas before touching business logic or the database.
 
 ---
 
