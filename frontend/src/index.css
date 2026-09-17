@@ -129,6 +129,11 @@ body {
   to { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 /* ──────────────────────────────────────────────────────────────────────────────
    Utility classes
 ────────────────────────────────────────────────────────────────────────────── */

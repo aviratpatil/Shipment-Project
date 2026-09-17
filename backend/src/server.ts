@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { createServer } from "http";
 
 import { prisma } from "./lib/prisma";
+import { initWebSocketServer } from "./lib/websocket";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import authRoutes from "./routes/auth.routes";
 import customerRoutes from "./routes/customer.routes";
@@ -78,12 +80,19 @@ async function startServer() {
     await prisma.$connect();
     console.log("✅ Database connected successfully");
 
-    app.listen(PORT, () => {
+    // Create HTTP server from Express app so we can attach WebSocket
+    const httpServer = createServer(app);
+
+    // Module 5 – Real-time WebSocket notifications
+    initWebSocketServer(httpServer);
+
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📋 Health check: http://localhost:${PORT}/health`);
       console.log(`🔐 Auth:         http://localhost:${PORT}/api/auth`);
       console.log(`👥 Customers:    http://localhost:${PORT}/api/customers`);
       console.log(`📦 Shipments:    http://localhost:${PORT}/api/shipments`);
+      console.log(`🔌 WebSocket:    ws://localhost:${PORT}/ws`);
     });
   } catch (error) {
     console.error("❌ Failed to connect to database:", error);

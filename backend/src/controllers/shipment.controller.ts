@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as ShipmentService from "../services/shipment.service";
 import { ShipmentStatus } from "@prisma/client";
+import { broadcast } from "../lib/websocket";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/shipments
@@ -75,6 +76,17 @@ export async function updateShipmentStatus(
       req.params.id,
       req.body.status
     );
+
+    // Module 5 – Broadcast real-time WebSocket event to all connected clients
+    broadcast({
+      event: "shipment_status_changed",
+      shipmentId: shipment.id,
+      status: shipment.status,
+      trackingNumber: (shipment as any).trackingNumber ?? undefined,
+      customerName: (shipment as any).customer?.name ?? undefined,
+      timestamp: new Date().toISOString(),
+    });
+
     res.json({
       success: true,
       message: "Shipment status updated successfully.",

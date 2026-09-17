@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface StatsCardProps {
   title: string;
@@ -10,44 +10,34 @@ interface StatsCardProps {
 
 const COLOR_MAP = {
   blue: {
-    gradient: "linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)",
-    border: "#bfdbfe",
-    icon: "#dbeafe",
-    iconText: "#1d4ed8",
+    iconBg: "#eff6ff",
+    iconBorder: "#dbeafe",
+    iconText: "#2563eb",
     accent: "#3b82f6",
-    value: "#1e3a8a",
   },
   emerald: {
-    gradient: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
-    border: "#a7f3d0",
-    icon: "#d1fae5",
-    iconText: "#065f46",
+    iconBg: "#ecfdf5",
+    iconBorder: "#d1fae5",
+    iconText: "#059669",
     accent: "#10b981",
-    value: "#064e3b",
   },
   amber: {
-    gradient: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)",
-    border: "#fde68a",
-    icon: "#fef3c7",
-    iconText: "#92400e",
+    iconBg: "#fffbeb",
+    iconBorder: "#fef3c7",
+    iconText: "#d97706",
     accent: "#f59e0b",
-    value: "#78350f",
   },
   purple: {
-    gradient: "linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)",
-    border: "#ddd6fe",
-    icon: "#ede9fe",
-    iconText: "#5b21b6",
+    iconBg: "#f5f3ff",
+    iconBorder: "#ede9fe",
+    iconText: "#7c3aed",
     accent: "#8b5cf6",
-    value: "#4c1d95",
   },
   rose: {
-    gradient: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
-    border: "#fecdd3",
-    icon: "#ffe4e6",
-    iconText: "#9f1239",
+    iconBg: "#fff1f2",
+    iconBorder: "#ffe4e6",
+    iconText: "#e11d48",
     accent: "#f43f5e",
-    value: "#881337",
   },
 };
 
@@ -59,41 +49,37 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   subtitle,
 }) => {
   const theme = COLOR_MAP[color];
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
-      className="glass-card fade-up"
       style={{
-        background: theme.gradient,
-        border: `1px solid ${theme.border}`,
+        backgroundColor: "#FFFFFF",
+        border: `1px solid ${isHovered ? "#cbd5e1" : "#E5E7EB"}`,
         borderRadius: "16px",
-        padding: "22px 24px",
+        padding: "20px 22px",
         display: "flex",
         alignItems: "flex-start",
         gap: "16px",
         position: "relative",
-        overflow: "hidden",
         cursor: "default",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-        boxShadow: "none",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+        boxShadow: isHovered
+          ? "0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.01)"
+          : "0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)",
+        transform: isHovered ? "translateY(-2px)" : "translateY(0)",
       }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 24px ${theme.border}`;
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Icon */}
+      {/* Icon with light accent container */}
       <div
         style={{
-          width: "48px",
-          height: "48px",
+          width: "46px",
+          height: "46px",
           borderRadius: "12px",
-          backgroundColor: theme.icon,
-          border: `1px solid ${theme.border}`,
+          backgroundColor: theme.iconBg,
+          border: `1px solid ${theme.iconBorder}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -104,17 +90,16 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         {icon}
       </div>
 
-      {/* Content */}
+      {/* Typography Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <p
           style={{
             fontSize: "12px",
             fontWeight: 600,
-            color: theme.iconText,
+            color: "#6b7280",
             margin: "0 0 4px 0",
-            letterSpacing: "0.03em",
+            letterSpacing: "0.02em",
             textTransform: "uppercase",
-            opacity: 0.8,
           }}
         >
           {title}
@@ -123,7 +108,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           style={{
             fontSize: "28px",
             fontWeight: 800,
-            color: theme.value,
+            color: "#111827",
             lineHeight: 1.1,
             letterSpacing: "-0.5px",
           }}
@@ -131,7 +116,15 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           {value}
         </div>
         {subtitle && (
-          <p style={{ fontSize: "12px", color: theme.iconText, marginTop: "4px", opacity: 0.65 }}>
+          <p
+            style={{
+              fontSize: "12px",
+              fontWeight: 500,
+              color: "#9ca3af",
+              marginTop: "4px",
+              marginBottom: 0,
+            }}
+          >
             {subtitle}
           </p>
         )}
@@ -139,3 +132,4 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     </div>
   );
 };
+

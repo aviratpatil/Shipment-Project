@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Package,
   Users,
@@ -33,6 +33,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenAddShipment,
   onNavigate,
 }) => {
+  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+
   const inTransitCount = shipments.filter((s) => s.status === "IN_TRANSIT").length;
   const deliveredCount = shipments.filter((s) => s.status === "DELIVERED").length;
   const pendingCount = shipments.filter((s) => s.status === "PENDING").length;
@@ -44,26 +46,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     .slice(0, 6);
 
   return (
-    <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+    <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: "28px", paddingBottom: "40px" }}>
       {/* ── Header ── */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
+          alignItems: "center",
           flexWrap: "wrap",
           gap: "16px",
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "12px", flexWrap: "wrap" }}>
             <h1
               style={{
                 margin: 0,
                 fontSize: "26px",
                 fontWeight: 800,
-                color: "var(--text-primary)",
+                color: "#0f172a",
                 letterSpacing: "-0.5px",
+                lineHeight: 1.2,
               }}
             >
               Operations Overview
@@ -80,32 +83,55 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 backgroundColor: isDbConnected ? "#ecfdf5" : "#fef2f2",
                 color: isDbConnected ? "#059669" : "#dc2626",
                 border: `1px solid ${isDbConnected ? "#a7f3d0" : "#fecaca"}`,
+                alignSelf: "center",
               }}
             >
               <span
                 style={{
-                  width: "5px",
-                  height: "5px",
+                  width: "6px",
+                  height: "6px",
                   borderRadius: "50%",
                   backgroundColor: isDbConnected ? "#10b981" : "#ef4444",
                   animation: isDbConnected ? "pulse-dot 2s infinite" : "none",
                 }}
               />
               <Activity size={11} />
-              {isDbConnected ? "Live" : "Offline"}
+              {isDbConnected ? "⚡ Live" : "Offline"}
             </span>
           </div>
-          <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)" }}>
+          <p style={{ margin: "4px 0 0 0", fontSize: "14px", color: "#64748b" }}>
             Real-time shipment monitoring and customer logistics dashboard
           </p>
         </div>
 
+        {/* Action Buttons: Solid primary blue for Shipment, outlined neutral for Customer */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <Button variant="outline" size="sm" icon={<Plus size={14} />} onClick={onOpenAddCustomer}>
-            New Customer
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<Plus size={14} />}
+            onClick={onOpenAddCustomer}
+            style={{
+              borderColor: "#d1d5db",
+              color: "#374151",
+              backgroundColor: "#ffffff",
+              fontWeight: 600,
+            }}
+          >
+            + New Customer
           </Button>
-          <Button size="sm" icon={<Plus size={14} />} onClick={onOpenAddShipment}>
-            Create Shipment
+          <Button
+            size="sm"
+            icon={<Plus size={14} />}
+            onClick={onOpenAddShipment}
+            style={{
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              fontWeight: 600,
+              boxShadow: "0 2px 4px rgba(37, 99, 235, 0.2)",
+            }}
+          >
+            + Create Shipment
           </Button>
         </div>
       </div>
@@ -159,23 +185,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 300px",
+          gridTemplateColumns: "1fr 320px",
           gap: "20px",
           alignItems: "start",
         }}
       >
         {/* Recent Shipments Table */}
         <div
-          className="glass-card"
-          style={{ overflow: "hidden" }}
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderRadius: "16px",
+            border: "1px solid #E5E7EB",
+            boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+            overflow: "hidden",
+          }}
         >
           <div
             style={{
               padding: "18px 24px",
-              borderBottom: "1px solid var(--border)",
+              borderBottom: "1px solid #E5E7EB",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              backgroundColor: "#ffffff",
             }}
           >
             <div>
@@ -184,12 +216,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   margin: "0 0 2px 0",
                   fontSize: "15px",
                   fontWeight: 700,
-                  color: "var(--text-primary)",
+                  color: "#0f172a",
                 }}
               >
                 Recent Shipments
               </h2>
-              <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
+              <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
                 Latest tracking milestones
               </p>
             </div>
@@ -198,7 +230,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               size="sm"
               icon={<ArrowRight size={13} />}
               onClick={() => onNavigate("shipments")}
-              style={{ flexDirection: "row-reverse" }}
+              style={{ flexDirection: "row-reverse", color: "#2563eb", fontWeight: 600 }}
             >
               View All
             </Button>
@@ -209,7 +241,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               style={{
                 padding: "60px 24px",
                 textAlign: "center",
-                color: "var(--text-muted)",
+                color: "#64748b",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -226,12 +258,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#60a5fa",
+                  color: "#2563eb",
                 }}
               >
                 <Package size={22} />
               </div>
-              <p style={{ margin: 0, fontSize: "14px", fontWeight: 500 }}>
+              <p style={{ margin: 0, fontSize: "14px", fontWeight: 500, color: "#374151" }}>
                 No shipments created yet
               </p>
               <Button size="sm" icon={<Plus size={13} />} onClick={onOpenAddShipment}>
@@ -244,18 +276,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}
               >
                 <thead>
-                  <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  <tr style={{ borderBottom: "1px solid #E5E7EB", backgroundColor: "#f8fafc" }}>
                     {["TRACKING #", "CUSTOMER", "ROUTE", "STATUS", "DATE"].map((h) => (
                       <th
                         key={h}
                         style={{
-                          padding: "10px 20px",
+                          padding: "12px 20px",
                           fontSize: "11px",
-                          fontWeight: 600,
-                          color: "var(--text-muted)",
+                          fontWeight: 700,
+                          color: "#475569",
                           letterSpacing: "0.05em",
                           textTransform: "uppercase",
-                          backgroundColor: "#f8fafc",
                           whiteSpace: "nowrap",
                         }}
                       >
@@ -265,81 +296,89 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {recentShipments.map((shipment, idx) => (
-                    <tr
-                      key={shipment.id}
-                      style={{
-                        borderBottom:
-                          idx < recentShipments.length - 1 ? "1px solid var(--border)" : "none",
-                        transition: "background-color 0.15s ease",
-                      }}
-                    >
-                      <td
+                  {recentShipments.map((shipment, idx) => {
+                    const isHovered = hoveredRowId === shipment.id;
+                    return (
+                      <tr
+                        key={shipment.id}
+                        onMouseEnter={() => setHoveredRowId(shipment.id)}
+                        onMouseLeave={() => setHoveredRowId(null)}
                         style={{
-                          padding: "14px 20px",
-                          fontSize: "13px",
-                          fontWeight: 700,
-                          color: "#2563eb",
-                          fontFamily: "monospace",
+                          borderBottom:
+                            idx < recentShipments.length - 1 ? "1px solid #E5E7EB" : "none",
+                          backgroundColor: isHovered ? "#f8fafc" : "#ffffff",
+                          transition: "background-color 0.15s ease",
                         }}
                       >
-                        {shipment.trackingNumber}
-                      </td>
-                      <td style={{ padding: "14px 20px" }}>
-                        {shipment.customer ? (
-                          <div>
-                            <div
-                              style={{
-                                fontSize: "13px",
-                                fontWeight: 600,
-                                color: "var(--text-primary)",
-                              }}
-                            >
-                              {shipment.customer.name}
+                        <td
+                          style={{
+                            padding: "14px 20px",
+                            fontSize: "13px",
+                            fontWeight: 700,
+                            color: "#2563eb",
+                            fontFamily: "monospace",
+                          }}
+                        >
+                          {shipment.trackingNumber}
+                        </td>
+                        <td style={{ padding: "14px 20px" }}>
+                          {shipment.customer ? (
+                            <div>
+                              <div
+                                style={{
+                                  fontSize: "13px",
+                                  fontWeight: 600,
+                                  color: "#1e293b",
+                                }}
+                              >
+                                {shipment.customer.name}
+                              </div>
+                              <div
+                                style={{ fontSize: "11px", color: "#475569", fontWeight: 500 }}
+                              >
+                                {shipment.customer.company}
+                              </div>
                             </div>
-                            <div
-                              style={{ fontSize: "11px", color: "var(--text-muted)" }}
-                            >
-                              {shipment.customer.company}
-                            </div>
-                          </div>
-                        ) : (
-                          <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>N/A</span>
-                        )}
-                      </td>
-                      <td
-                        style={{
-                          padding: "14px 20px",
-                          fontSize: "12px",
-                          color: "var(--text-secondary)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          {shipment.origin}
-                          <ArrowRight size={11} color="var(--text-muted)" />
-                          {shipment.destination}
-                        </span>
-                      </td>
-                      <td style={{ padding: "14px 20px" }}>
-                        <StatusBadge status={shipment.status} />
-                      </td>
-                      <td
-                        style={{
-                          padding: "14px 20px",
-                          fontSize: "11px",
-                          color: "var(--text-muted)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {new Date(shipment.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </td>
-                    </tr>
-                  ))}
+                          ) : (
+                            <span style={{ color: "#64748b", fontSize: "13px" }}>N/A</span>
+                          )}
+                        </td>
+                        <td
+                          style={{
+                            padding: "14px 20px",
+                            fontSize: "12px",
+                            color: "#334155",
+                            fontWeight: 500,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            {shipment.origin}
+                            <ArrowRight size={11} color="#64748b" />
+                            {shipment.destination}
+                          </span>
+                        </td>
+                        <td style={{ padding: "14px 20px" }}>
+                          <StatusBadge status={shipment.status} />
+                        </td>
+                        <td
+                          style={{
+                            padding: "14px 20px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            color: "#374151",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {new Date(shipment.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -349,48 +388,56 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Right Sidebar: Status Breakdown */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Status breakdown card */}
-          <div className="glass-card" style={{ padding: "20px" }}>
+          <div
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: "16px",
+              border: "1px solid #E5E7EB",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+              padding: "20px",
+            }}
+          >
             <h3
               style={{
                 margin: "0 0 16px 0",
-                fontSize: "13px",
+                fontSize: "14px",
                 fontWeight: 700,
-                color: "var(--text-primary)",
+                color: "#0f172a",
                 display: "flex",
                 alignItems: "center",
-                gap: "7px",
+                gap: "8px",
               }}
             >
-              <TrendingUp size={14} color="#60a5fa" />
+              <TrendingUp size={16} color="#2563eb" />
               Status Breakdown
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {[
                 {
                   label: "Delivered",
                   count: deliveredCount,
                   color: "#10b981",
-                  bg: "rgba(16,185,129,0.15)",
+                  trackBg: "#ecfdf5",
                 },
                 {
                   label: "In Transit",
                   count: inTransitCount,
                   color: "#3b82f6",
-                  bg: "rgba(59,130,246,0.15)",
+                  trackBg: "#eff6ff",
                 },
                 {
                   label: "Pending",
                   count: pendingCount,
                   color: "#f59e0b",
-                  bg: "rgba(245,158,11,0.15)",
+                  trackBg: "#fffbeb",
                 },
                 {
                   label: "Cancelled",
                   count: cancelledCount,
                   color: "#ef4444",
-                  bg: "rgba(239,68,68,0.15)",
+                  trackBg: "#fef2f2",
                 },
-              ].map(({ label, count, color, bg }) => {
+              ].map(({ label, count, color, trackBg }) => {
                 const pct =
                   shipments.length > 0
                     ? Math.round((count / shipments.length) * 100)
@@ -402,21 +449,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        marginBottom: "5px",
+                        marginBottom: "6px",
                       }}
                     >
-                      <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 500 }}>
+                      <span style={{ fontSize: "13px", color: "#374151", fontWeight: 600 }}>
                         {label}
                       </span>
-                      <span style={{ fontSize: "12px", fontWeight: 700, color }}>
-                        {count} ({pct}%)
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                        {count}{" "}
+                        <span style={{ color: "#64748b", fontWeight: 500 }}>({pct}%)</span>
                       </span>
                     </div>
+                    {/* Visual Progress Bar */}
                     <div
                       style={{
-                        height: "5px",
+                        height: "7px",
                         borderRadius: "9999px",
-                        backgroundColor: "#e2e8f0",
+                        backgroundColor: trackBg,
+                        border: `1px solid ${color}20`,
                         overflow: "hidden",
                       }}
                     >
@@ -425,9 +475,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           height: "100%",
                           borderRadius: "9999px",
                           width: `${pct}%`,
-                          background: bg,
-                          border: `1px solid ${color}40`,
-                          transition: "width 0.8s ease",
+                          backgroundColor: color,
+                          transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                         }}
                       />
                     </div>
@@ -438,19 +487,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Quick actions */}
-          <div className="glass-card" style={{ padding: "20px" }}>
+          <div
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: "16px",
+              border: "1px solid #E5E7EB",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+              padding: "20px",
+            }}
+          >
             <h3
               style={{
                 margin: "0 0 14px 0",
-                fontSize: "13px",
+                fontSize: "14px",
                 fontWeight: 700,
-                color: "var(--text-primary)",
+                color: "#0f172a",
                 display: "flex",
                 alignItems: "center",
-                gap: "7px",
+                gap: "8px",
               }}
             >
-              <AlertCircle size={14} color="#a78bfa" />
+              <AlertCircle size={16} color="#8b5cf6" />
               Quick Actions
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -459,7 +516,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 size="sm"
                 icon={<Plus size={13} />}
                 onClick={onOpenAddCustomer}
-                style={{ width: "100%", justifyContent: "flex-start" }}
+                style={{ width: "100%", justifyContent: "flex-start", fontWeight: 600 }}
               >
                 Register Customer
               </Button>
@@ -467,7 +524,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 size="sm"
                 icon={<Plus size={13} />}
                 onClick={onOpenAddShipment}
-                style={{ width: "100%", justifyContent: "flex-start" }}
+                style={{ width: "100%", justifyContent: "flex-start", backgroundColor: "#2563eb", fontWeight: 600 }}
               >
                 New Shipment
               </Button>
@@ -476,7 +533,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 size="sm"
                 icon={<Users size={13} />}
                 onClick={() => onNavigate("customers")}
-                style={{ width: "100%", justifyContent: "flex-start" }}
+                style={{ width: "100%", justifyContent: "flex-start", fontWeight: 600 }}
               >
                 View Customers
               </Button>
@@ -487,3 +544,4 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     </div>
   );
 };
+

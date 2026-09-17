@@ -9,14 +9,27 @@ backend/dist/
 frontend/dist/
 dist-ssr/
 
-# Environment variables & secrets
+# Environment variables & secrets (CRITICAL: NEVER COMMIT OR PUSH)
 .env
 .env.*
+*.env
+**/.env
+**/.env.*
+*/**/.env
 backend/.env
 backend/.env.*
 frontend/.env
 frontend/.env.*
+ai-service/.env
+ai-service/.env.*
+analytics-service/.env
+analytics-service/.env.*
+!.env.example
+!**/.env.example
 *.local
+*.key
+*.pem
+secrets/
 
 # Logs
 logs/
@@ -37,3 +50,13 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+analytics-service/venv/
+ai-service/venv/

@@ -7,12 +7,13 @@ import {
   User as UserIcon,
   Shield,
   ChevronDown,
+  BarChart3,
 } from "lucide-react";
 import type { User } from "../types";
 
 interface NavbarProps {
-  currentTab: "dashboard" | "customers" | "shipments";
-  onTabChange: (tab: "dashboard" | "customers" | "shipments") => void;
+  currentTab: "dashboard" | "customers" | "shipments" | "analytics";
+  onTabChange: (tab: "dashboard" | "customers" | "shipments" | "analytics") => void;
   currentUser: User | null;
   onLogout: () => void;
   onOpenAuth: () => void;
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
   { id: "customers" as const, label: "Customers", icon: Users },
   { id: "shipments" as const, label: "Shipments", icon: Package },
+  { id: "analytics" as const, label: "Analytics", icon: BarChart3 },
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({
