@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum CustomerStatus {
+  Active
+  Inactive
+}
+
+enum ShipmentStatus {
+  PENDING
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+// ==========================================
+// MODELS
+// ==========================================
+
+// 1. User Model (Module 2 & Security Requirements)
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatSessions ChatSession[]
+}
+
+// 2. Customer Model (Module 1)
+model Customer {
+  id        String         @id @default(uuid())
+  name      String
+  email     String         @unique
+  company   String
+  status    CustomerStatus @default(Active)
+  isDeleted Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  shipments Shipment[]
+}
+
+// 3. Shipment Model (Module 1)
+model Shipment {
+  id             String         @id @default(uuid())
+  trackingNumber String         @unique
+  customerId     String
+  customer       Customer       @relation(fields: [customerId], references: [id])
+  origin         String
+  destination    String
+  status         ShipmentStatus @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  statusHistory ShipmentStatusHistory[]
+}
+
+// 4. Shipment Status History (Module 5 Audit Log)
+model ShipmentStatusHistory {
+  id         String         @id @default(uuid())
+  shipmentId String
+  shipment   Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status     ShipmentStatus
+  updatedAt  DateTime       @default(now())
+}
+
+// 5. Sales Data Model (Module 3)
+model SalesRecord {
+  id          String   @id @default(uuid())
+  salesperson String
+  revenue     Float
+  region      String
+  createdAt   DateTime @default(now())
+}
+
+// 6. AI Conversation Context Models (Module 4)
+model ChatSession {
+  id        String        @id @default(uuid())
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [id])
+  title     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      MessageRole
+  content   String
+  createdAt DateTime    @default(now())
+}
+
+// 7. Announcement Model (Bonus 3)
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  category  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
