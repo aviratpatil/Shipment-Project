@@ -1,394 +1,618 @@
-# 📦 Shipment Management System (Full-Stack Platform)
+<h1 align="center">
+  🚚 ShipmentPro — Logistics & Supply Chain Management Platform
+</h1>
 
-A modern, production-ready full-stack logistics platform featuring a **React 19 + TypeScript + Vite** frontend and a robust **Node.js + Express + TypeScript + Prisma + PostgreSQL** backend API.
+<p align="center">
+  A full-stack, microservices-based logistics management platform with real-time tracking, AI-powered chat assistant, and analytics.
+</p>
 
----
-
-## 📑 Table of Contents
-1. [Project Overview](#-project-overview)
-2. [Architecture & Monorepo Structure](#-architecture--monorepo-structure)
-3. [Tech Stack](#-tech-stack)
-4. [Quick Start Guide](#-quick-start-guide)
-5. [Frontend Overview](#-frontend-overview)
-6. [User Roles & Permissions (USER vs ADMIN)](#-user-roles--permissions-user-vs-admin)
-7. [Database Schema & Entity Relationships](#-database-schema--entity-relationships)
-8. [API Endpoints Reference](#-api-endpoints-reference)
-9. [Testing with Postman](#-testing-with-postman)
-
----
-
-## 🌟 Project Overview
-
-The **Shipment Management System** is designed for modern logistics operations. It provides a complete web interface and RESTful API for shipping, dispatch, customer management, and freight tracking:
-
-- **Interactive React Frontend**: Clean, high-contrast light theme dashboard with real-time operations overview, shipment dispatch dialogs, customer directory, and modal tracking inspect.
-- **Customer Directory**: Store and manage corporate and individual clients with soft-delete data protection.
-- **Shipment Lifecycle Tracking**: Monitor shipments across 5 distinct phases: `PENDING` ➔ `IN_TRANSIT` ➔ `OUT_FOR_DELIVERY` ➔ `DELIVERED` (or `CANCELLED`).
-- **Complete Audit Trail**: Every status update automatically records timestamps and history in a dedicated audit log (`ShipmentStatusHistory`).
-- **Strict Security & Validation**: JWT-based authentication with role-based permissions (`ADMIN` vs `USER`) and Zod request validation.
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" />
+  <img src="https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=node.js" />
+  <img src="https://img.shields.io/badge/Python-Flask-3776AB?style=flat-square&logo=python" />
+  <img src="https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?style=flat-square&logo=postgresql" />
+  <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma" />
+  <img src="https://img.shields.io/badge/AI-Groq%20%2F%20OpenAI-FF6B35?style=flat-square" />
+</p>
 
 ---
 
-## 🚀 Quick Start Guide
+## 📋 Table of Contents
 
-### 1. Prerequisites
-- Node.js (v18+ recommended)
-- PostgreSQL database instance
+- [Project Overview](#-project-overview)
+- [Architecture](#-architecture)
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Installation Guide](#-installation-guide)
+  - [Step 1: Clone the Repository](#step-1-clone-the-repository)
+  - [Step 2: Install PostgreSQL & Create Database](#step-2-install-postgresql--create-database)
+  - [Step 3: Setup Backend (Node.js API)](#step-3-setup-backend-nodejs-api)
+  - [Step 4: Setup Frontend (React App)](#step-4-setup-frontend-react-app)
+  - [Step 5: Setup Analytics Service (Python/Flask)](#step-5-setup-analytics-service-pythonflask)
+  - [Step 6: Setup AI Assistant Service (Python/Flask + RAG)](#step-6-setup-ai-assistant-service-pythonflask--rag)
+- [Running the Project](#-running-the-project)
+- [Default Login Credentials](#-default-login-credentials)
+- [Service Ports & URLs](#-service-ports--urls)
+- [Environment Variables Reference](#-environment-variables-reference)
+- [Project Structure](#-project-structure)
+- [API Overview](#-api-overview)
+- [Troubleshooting](#-troubleshooting)
 
-### 2. Backend Setup
-```bash
-cd backend
-npm install
-npx prisma migrate dev
-npm run dev
-# Backend runs at http://localhost:5000
+---
+
+## 📦 Project Overview
+
+**ShipmentPro** is an enterprise-grade logistics management platform built as a **monorepo with four microservices**:
+
+| Service | Technology | Port | Purpose |
+|---|---|---|---|
+| **Backend API** | Node.js + Express + TypeScript + Prisma | `5000` | Core REST API, Auth, CRUD, WebSockets |
+| **Frontend** | React 19 + TypeScript + Vite | `5173` | Web dashboard UI |
+| **Analytics Service** | Python + Flask + Pandas + Plotly | `5001` | Chart generation & sales reports |
+| **AI Assistant Service** | Python + Flask + OpenAI/Groq + pgvector | `5002` | RAG-powered ShipBot chatbot |
+
+### Key Features
+
+- 🔐 **JWT Authentication** with Role-Based Access Control (ADMIN / USER / DRIVER)
+- 📦 **Shipment Management** — Create, track, and manage shipments end-to-end
+- 🚛 **Fleet & Driver Management** — Assign drivers to trucks and shipments
+- 📊 **Real-time Analytics** — Interactive charts for revenue and performance
+- 📡 **Live Notifications** — WebSocket-based real-time status updates
+- 🤖 **ShipBot AI Assistant** — RAG pipeline chatbot powered by Groq or OpenAI
+- 📋 **Audit Trails** — Immutable status history for every shipment
+- 📢 **Announcements** — Admin-broadcast system alerts
+
+---
+
+## 🏛 Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    Browser (Port 5173)               │
+│              React 19 + TypeScript + Vite            │
+└──────────┬──────────────┬──────────────┬────────────┘
+           │ REST API      │ REST API      │ REST API
+           ▼               ▼               ▼
+┌──────────────┐  ┌───────────────┐  ┌────────────────┐
+│  Backend API │  │   Analytics   │  │   AI Assistant │
+│  Node/Express│  │ Python/Flask  │  │  Python/Flask  │
+│   Port 5000  │  │   Port 5001   │  │   Port 5002    │
+│  Prisma ORM  │  │ Pandas/Plotly │  │ OpenAI/Groq    │
+└──────┬───────┘  └───────────────┘  └───────┬────────┘
+       │ SQL                                   │ SQL (pgvector)
+       ▼                                       ▼
+┌─────────────────────────────────────────────────────┐
+│              PostgreSQL Database                     │
+│    (shipment_db — shared by all services)            │
+└─────────────────────────────────────────────────────┘
 ```
 
-### 3. Frontend Setup
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+- **React 19** + **TypeScript** + **Vite**
+- **Lucide React** (icons)
+- Vanilla CSS with glassmorphism & dark-mode design
+
+### Backend API
+- **Node.js** + **Express 5** + **TypeScript**
+- **Prisma ORM** (schema-first, auto-migrations)
+- **JWT** authentication + **bcryptjs** password hashing
+- **Zod** request validation
+- **WebSockets** (`ws`) for real-time push notifications
+
+### Analytics Service
+- **Python 3.10+** + **Flask** + **Flask-CORS**
+- **Pandas** (data processing) + **Plotly** (chart generation) + **Kaleido** (PNG export)
+
+### AI Assistant Service
+- **Python 3.10+** + **Flask** + **Flask-CORS**
+- **OpenAI SDK** (compatible with Groq via base_url override)
+- **Groq API** (`qwen/qwen3.8-27b` model — free tier)
+- **pgvector** — PostgreSQL vector similarity search
+- **psycopg2** — Direct PostgreSQL access for RAG & session persistence
+
+### Database
+- **PostgreSQL 14+**
+- **pgvector** extension (optional, falls back gracefully)
+
+---
+
+## ✅ Prerequisites
+
+Make sure the following are installed on your machine **before** starting:
+
+| Tool | Minimum Version | Check Command | Download |
+|---|---|---|---|
+| **Git** | Any | `git --version` | [git-scm.com](https://git-scm.com) |
+| **Node.js** | 18+ | `node --version` | [nodejs.org](https://nodejs.org) |
+| **npm** | 9+ | `npm --version` | Bundled with Node.js |
+| **Python** | 3.10+ | `python --version` | [python.org](https://python.org) |
+| **pip** | Any | `pip --version` | Bundled with Python |
+| **PostgreSQL** | 14+ | `psql --version` | [postgresql.org](https://www.postgresql.org/download/) |
+
+> **Windows users:** During PostgreSQL installation, note your **password** for the `postgres` superuser — you'll need it in Step 2.
+
+---
+
+## 🚀 Installation Guide
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/aviratpatil/Shipment-Project.git
+cd Shipment-Project
+```
+
+---
+
+### Step 2: Install PostgreSQL & Create Database
+
+#### 2a. Open PostgreSQL shell
+
+**Windows (pgAdmin or psql):**
+```bash
+psql -U postgres
+```
+Enter your PostgreSQL password when prompted.
+
+**macOS/Linux:**
+```bash
+sudo -u postgres psql
+```
+
+#### 2b. Create the database
+
+```sql
+CREATE DATABASE shipment_db;
+\q
+```
+
+> The database is now ready. All tables will be auto-created by Prisma in the next step.
+
+---
+
+### Step 3: Setup Backend (Node.js API)
+
+```bash
+cd backend
+```
+
+#### 3a. Install dependencies
+
+```bash
+npm install
+```
+
+#### 3b. Configure environment variables
+
+```bash
+copy .env.example .env
+```
+> On **macOS/Linux**, use: `cp .env.example .env`
+
+Open `backend/.env` and fill in your values:
+
+```env
+PORT=5000
+DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/shipment_db?schema=public"
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+```
+
+> Replace `YOUR_PASSWORD` with your actual PostgreSQL `postgres` user password.
+
+#### 3c. Run Prisma migrations (creates all tables)
+
+```bash
+npx prisma migrate deploy
+```
+
+> If this is a fresh setup and no migrations exist yet:
+> ```bash
+> npx prisma migrate dev --name init
+> ```
+
+#### 3d. Seed the database (sample data)
+
+```bash
+npm run seed
+```
+
+This populates the database with:
+- **1 Admin** user (`admin@system.com`)
+- **3 Driver** users (`driver1`, `driver2`, `driver3` `@system.com`)
+- **5 Regular** users
+- **3 Trucks** with different statuses
+- **5 Customers**
+- **7 Shipments** with full status history
+- **Sales records** for analytics
+- **Announcements**
+
+#### 3e. Start the backend server
+
+```bash
+npm run dev
+```
+
+✅ Backend is running at `http://localhost:5000`
+
+---
+
+### Step 4: Setup Frontend (React App)
+
+Open a **new terminal window**:
+
 ```bash
 cd frontend
 npm install
 npm run dev
-# Frontend runs at http://localhost:5173
 ```
+
+✅ Frontend is running at `http://localhost:5173`
 
 ---
 
-## 👥 User Roles & Permissions (USER vs ADMIN)
+### Step 5: Setup Analytics Service (Python/Flask)
 
-The application implements **Role-Based Access Control (RBAC)** using the `UserRole` enum (`ADMIN` | `USER`).
+Open a **new terminal window**:
 
-```
-                    ┌──────────────────────────────────────┐
-                    │            USER ROLES                │
-                    └──────────────────┬───────────────────┘
-                                       │
-                ┌──────────────────────┴──────────────────────┐
-                ▼                                             ▼
-        ┌──────────────┐                              ┌──────────────┐
-        │     USER     │                              │    ADMIN     │
-        │ (Operations) │                              │ (Superuser)  │
-        └──────────────┘                              └──────────────┘
+```bash
+cd analytics-service
 ```
 
-### 1. `USER` Role (Logistics Staff / Dispatch Operator)
-The standard user represents frontline logistics coordinators, warehouse staff, and customer service representatives.
+#### 5a. Create a virtual environment (recommended)
 
-* **What they can do:**
-  - **Register & Login**: Authenticate securely using email and password.
-  - **View Profile**: View their own profile information (`GET /api/auth/me`).
-  - **Create Customers**: Onboard new client accounts (`POST /api/customers`).
-  - **Browse & Search Customers**: View paginated lists and search customers by name, company, or email.
-  - **View Customer Details**: View a customer along with all their linked shipments.
-  - **Create Shipments**: Generate new shipments with tracking numbers (`POST /api/shipments`).
-  - **Track & Update Status**: Update live shipment milestones (e.g., mark package as `IN_TRANSIT` or `OUT_FOR_DELIVERY`).
-  - **View Audit Logs**: Inspect status transition histories for tracking transparency.
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
 
-* **Restrictions:**
-  - Cannot soft-delete customer profiles.
-  - Cannot modify system-wide administrative settings or user accounts.
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+#### 5b. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 5c. Configure environment variables
+
+```bash
+# Windows
+copy .env.example .env
+
+# macOS/Linux
+cp .env.example .env
+```
+
+`analytics-service/.env` only needs:
+```env
+PORT=5001
+```
+
+#### 5d. Start the analytics service
+
+```bash
+python app.py
+```
+
+✅ Analytics service running at `http://localhost:5001`
 
 ---
 
-### 2. `ADMIN` Role (Logistics Manager / System Administrator)
-The Admin has elevated authority and oversees the entire system.
+### Step 6: Setup AI Assistant Service (Python/Flask + RAG)
 
-* **What they can do (Everything `USER` can do, plus):**
-  - **Soft Delete Customers**: Safely archive/deactivate customer accounts (`DELETE /api/customers/:id`).
-  - **Full Customer & Shipment Management**: Edit company information, override shipment statuses, or re-route shipments.
-  - **Audit Oversight**: Monitor all audit histories to detect anomalies or dispatch bottlenecks.
-  - **User & Role Administration**: Manage staff accounts, promote users to `ADMIN`, or revoke access.
-  - **Analytics & Reporting**: Query sales records and system announcements.
+Open a **new terminal window**:
 
----
-
-### 🛡️ Permissions Matrix
-
-| Feature / Action | Endpoint | Public | `USER` | `ADMIN` |
-|---|---|:---:|:---:|:---:|
-| Register account | `POST /api/auth/register` | ✅ | ✅ | ✅ |
-| Login / Get Token | `POST /api/auth/login` | ✅ | ✅ | ✅ |
-| View own profile | `GET /api/auth/me` | ❌ | ✅ | ✅ |
-| View customer list & search | `GET /api/customers` | ✅ | ✅ | ✅ |
-| View single customer details | `GET /api/customers/:id` | ✅ | ✅ | ✅ |
-| Create new customer | `POST /api/customers` | ❌ | ✅ | ✅ |
-| Update customer info | `PUT /api/customers/:id` | ❌ | ✅ | ✅ |
-| Soft delete customer | `DELETE /api/customers/:id` | ❌ | ❌ | ✅ *(Restricted)* |
-| View shipment list | `GET /api/shipments` | ✅ | ✅ | ✅ |
-| View shipment details & history | `GET /api/shipments/:id` | ✅ | ✅ | ✅ |
-| Create shipment | `POST /api/shipments` | ❌ | ✅ | ✅ |
-| Update shipment status | `PATCH /api/shipments/:id/status` | ❌ | ✅ | ✅ |
-
----
-
-## 🏗️ System Architecture (How It Works)
-
-The project follows the clean **Controller - Service - Repository (Layered Architecture)** pattern:
-
-```
-[ Client: Postman / Web App ]
-              │
-              ▼ HTTP Request
-   [ 1. Express Server ] ──────► CORS, JSON Body Parser
-              │
-              ▼
-   [ 2. Route Layer ] ─────────► Matches URL (/api/shipments)
-              │
-              ▼
-   [ 3. Middlewares ] ─────────► authenticateJwt (Validates Bearer token)
-              │               ► validate(ZodSchema) (Validates JSON body)
-              ▼
-   [ 4. Controller Layer ] ────► Extracts req.body, calls Service, sends JSON response
-              │
-              ▼
-   [ 5. Service Layer ] ───────► Pure business logic, transactions, password hashing
-              │
-              ▼
-   [ 6. Prisma ORM ] ──────────► Type-safe SQL query generator
-              │
-              ▼
-   [ 7. PostgreSQL Database ] ─► Physical storage & ACID guarantees
+```bash
+cd ai-service
 ```
 
-### Why this architecture?
-1. **Separation of Concerns**: Controllers only handle HTTP (status codes, JSON formatting). Services only care about business rules.
-2. **Easy Testing**: Services can be tested independently without needing to spin up Express servers.
-3. **Maintainability**: If we ever change the database or web framework, only one isolated layer needs updating.
+#### 6a. Create a virtual environment (recommended)
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+#### 6b. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 6c. Configure environment variables
+
+```bash
+# Windows
+copy .env.example .env
+
+# macOS/Linux
+cp .env.example .env
+```
+
+Open `ai-service/.env` and configure it:
+
+```env
+PORT=5002
+
+# ── AI Provider (choose ONE) ────────────────────────────────────────────────
+# OPTION A: Groq (FREE — recommended for new users)
+# Get your free key at: https://console.groq.com/keys
+GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_MODEL=qwen/qwen3.8-27b
+
+# OPTION B: OpenAI (paid)
+# Get your key at: https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-your_openai_api_key_here
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_EMBED_MODEL=text-embedding-3-small
+
+# ── Database ────────────────────────────────────────────────────────────────
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/shipment_db
+MAX_HISTORY_MESSAGES=10
+TOP_K_CHUNKS=3
+BACKEND_API_URL=http://localhost:5000/api
+```
+
+> **Note:** The service auto-detects which provider to use — Groq takes priority if `GROQ_API_KEY` is set. You only need **one** of the two AI providers.
+
+#### 6d. Ingest knowledge base into the vector store
+
+This step embeds the ShipmentPro platform documentation into PostgreSQL for RAG retrieval:
+
+```bash
+python ingest.py
+```
+
+You should see output like:
+```
+[01/45] [OK] Embedded [fallback]: overview/platform
+[02/45] [OK] Embedded [fallback]: overview/technology
+...
+[SUCCESS] Ingestion complete! All 45 chunks stored in document_chunks.
+```
+
+> **Note:** If you have a Groq key configured, it uses a fast deterministic hash embedding (no API cost). If you have OpenAI credits, it uses `text-embedding-3-small` for semantic search.
+
+#### 6e. Start the AI service
+
+```bash
+python app.py
+```
+
+✅ AI Assistant running at `http://localhost:5002`
 
 ---
 
-## 💻 Tech Stack
+## ▶️ Running the Project
 
-| Technology | Purpose | Why We Use It |
+After completing all setup steps, you need **4 terminal windows** running simultaneously:
+
+| Terminal | Directory | Command |
 |---|---|---|
-| **Node.js** | Runtime Environment | High-throughput asynchronous event-driven I/O. |
-| **Express.js (v5)** | Web Framework | Minimalist, flexible routing and middleware pipeline. |
-| **TypeScript (v7)** | Programming Language | Strict compile-time type safety, preventing runtime `undefined` bugs. |
-| **PostgreSQL** | Relational Database | ACID compliant, reliable relational data modeling. |
-| **Prisma ORM (v6)** | Database Client | Automatic migrations, type-safe queries, and relation loading. |
-| **Zod** | Schema Validation | Runtime data validation of request bodies, query params, and route params. |
-| **JWT (`jsonwebtoken`)** | Authentication | Stateless authentication using Bearer tokens. |
-| **`bcryptjs`** | Cryptography | One-way password hashing with 10 salt rounds. |
+| **1** | `backend/` | `npm run dev` |
+| **2** | `frontend/` | `npm run dev` |
+| **3** | `analytics-service/` | `python app.py` |
+| **4** | `ai-service/` | `python app.py` |
+
+Then open your browser and go to: **`http://localhost:5173`**
 
 ---
 
-## 🗄️ Database Schema & Entity Relationships
+## 🔑 Default Login Credentials
 
-The schema is defined in [`prisma/schema.prisma`](file:///e:/Shipment-Management-System/backend/prisma/schema.prisma):
+After running `npm run seed` in the backend:
+
+| Role | Email | Password |
+|---|---|---|
+| **Admin** | `admin@system.com` | `password123` |
+| **Driver 1** | `driver1@system.com` | `password123` |
+| **Driver 2** | `driver2@system.com` | `password123` |
+| **Driver 3** | `driver3@system.com` | `password123` |
+| **User 1** | `user1@example.com` | `password123` |
+
+> ⚠️ **Change these passwords** in a production environment!
+
+---
+
+## 🌐 Service Ports & URLs
+
+| Service | URL | Description |
+|---|---|---|
+| **Frontend** | `http://localhost:5173` | Main web dashboard |
+| **Backend API** | `http://localhost:5000/api` | REST API base URL |
+| **Analytics Service** | `http://localhost:5001` | Chart generation endpoint |
+| **AI Assistant** | `http://localhost:5002` | ShipBot chat endpoint |
+| **Health Check (AI)** | `http://localhost:5002/health` | AI service health check |
+
+---
+
+## ⚙️ Environment Variables Reference
+
+### `backend/.env`
+
+| Variable | Required | Example | Description |
+|---|---|---|---|
+| `PORT` | ✅ | `5000` | Backend API port |
+| `DATABASE_URL` | ✅ | `postgresql://postgres:pass@localhost:5432/shipment_db?schema=public` | PostgreSQL connection string |
+| `JWT_SECRET` | ✅ | `my-secret-key` | Secret for signing JWT tokens |
+
+### `analytics-service/.env`
+
+| Variable | Required | Example | Description |
+|---|---|---|---|
+| `PORT` | ✅ | `5001` | Analytics service port |
+
+### `ai-service/.env`
+
+| Variable | Required | Example | Description |
+|---|---|---|---|
+| `PORT` | ✅ | `5002` | AI service port |
+| `GROQ_API_KEY` | ⚠️ One required | `gsk_...` | Groq API key (free at console.groq.com) |
+| `GROQ_MODEL` | — | `qwen/qwen3.8-27b` | Groq chat model |
+| `OPENAI_API_KEY` | ⚠️ One required | `sk-...` | OpenAI API key (alternative to Groq) |
+| `OPENAI_MODEL` | — | `gpt-4o-mini` | OpenAI chat model |
+| `OPENAI_EMBED_MODEL` | — | `text-embedding-3-small` | OpenAI embedding model |
+| `DATABASE_URL` | ✅ | `postgresql://...` | Same DB as backend (without `?schema=public`) |
+| `MAX_HISTORY_MESSAGES` | — | `10` | Chat history window size |
+| `TOP_K_CHUNKS` | — | `3` | Number of RAG context chunks |
+| `BACKEND_API_URL` | ✅ | `http://localhost:5000/api` | Points to backend for live data |
+
+---
+
+## 📁 Project Structure
 
 ```
-┌──────────────────┐           1 : N           ┌────────────────────────┐
-│     Customer     │ ───────────────────────── │        Shipment        │
-│──────────────────│                           │────────────────────────│
-│ id (PK)          │                           │ id (PK)                │
-│ name             │                           │ trackingNumber (Unique)│
-│ email (Unique)   │                           │ customerId (FK)        │
-│ company          │                           │ origin                 │
-│ status           │                           │ destination            │
-│ isDeleted        │                           │ status                 │
-└──────────────────┘                           └───────────┬────────────┘
-                                                           │
-                                                           │ 1 : N (Cascade)
-                                                           ▼
-                                               ┌────────────────────────┐
-                                               │ ShipmentStatusHistory  │
-                                               │────────────────────────│
-                                               │ id (PK)                │
-                                               │ shipmentId (FK)        │
-                                               │ status                 │
-                                               │ updatedAt              │
-                                               └────────────────────────┘
+Shipment-Project/
+├── backend/                    # Node.js + Express + TypeScript API
+│   ├── prisma/
+│   │   ├── schema.prisma       # Database schema (all models)
+│   │   ├── seed.ts             # Database seed script
+│   │   └── migrations/         # Auto-generated Prisma migrations
+│   ├── src/
+│   │   ├── server.ts           # App entry point + WebSocket server
+│   │   ├── routes/             # Express route handlers
+│   │   ├── middleware/         # Auth, validation middleware
+│   │   └── types/              # TypeScript type definitions
+│   ├── .env.example
+│   └── package.json
+│
+├── frontend/                   # React 19 + TypeScript + Vite
+│   ├── src/
+│   │   ├── App.tsx             # Root component + routing
+│   │   ├── components/         # Reusable UI components
+│   │   │   ├── ChatBot.tsx     # ShipBot AI chat widget
+│   │   │   └── ...
+│   │   ├── pages/              # Page-level components
+│   │   └── index.css           # Global styles + design tokens
+│   ├── index.html
+│   └── package.json
+│
+├── analytics-service/          # Python Flask analytics microservice
+│   ├── app.py                  # Flask app — chart generation endpoints
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── ai-service/                 # Python Flask AI assistant microservice
+│   ├── app.py                  # Flask app — /chat RAG endpoint
+│   ├── ingest.py               # Knowledge base ingestion script
+│   ├── schema.sql              # AI vector store SQL schema
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── .gitignore
+└── README.md
 ```
 
-### Key Highlights:
-1. **Customer ➔ Shipment (1-to-Many)**: One customer can have multiple packages sent.
-2. **Shipment ➔ ShipmentStatusHistory (1-to-Many with Cascade)**: Every status change creates a history entry. If a shipment is physically deleted, its history is cascade-deleted.
-3. **Soft Deletion (`isDeleted: Boolean`)**:
-   - When a customer is deleted, we execute:
-     `UPDATE "Customer" SET "isDeleted" = true, "status" = 'Inactive'`
-   - This ensures shipments associated with past customers never cause orphan records or foreign key crashes.
-4. **Prisma Atomic Transaction (`$transaction`)**:
-   - In `updateShipmentStatus()`, both the `Shipment` status update and the `ShipmentStatusHistory` insert are executed inside an atomic transaction. If either fails, the entire change rolls back.
+---
+
+## 🔌 API Overview
+
+### Backend API (`http://localhost:5000/api`)
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/auth/register` | ❌ | Register new user |
+| `POST` | `/auth/login` | ❌ | Login and get JWT token |
+| `GET` | `/customers` | ✅ | List all customers |
+| `POST` | `/customers` | ✅ Admin | Create customer |
+| `GET` | `/shipments` | ✅ | List all shipments |
+| `POST` | `/shipments` | ✅ | Create shipment |
+| `PATCH` | `/shipments/:id/status` | ✅ | Update shipment status |
+| `GET` | `/trucks` | ✅ | List all trucks |
+| `POST` | `/trucks` | ✅ Admin | Add truck |
+| `GET` | `/drivers` | ✅ | List all drivers |
+| `GET` | `/announcements` | ✅ | List announcements |
+| `POST` | `/announcements` | ✅ Admin | Create announcement |
+
+### AI Assistant API (`http://localhost:5002`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/chat` | Send message to ShipBot |
+| `GET` | `/chat/:session_id/history` | Get session conversation history |
+| `DELETE` | `/chat/:session_id` | Clear session history |
+| `GET` | `/health` | Health check with provider status |
+
+**Chat Request Example:**
+```bash
+curl -X POST http://localhost:5002/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is ShipmentPro?", "session_id": "my-session-123"}'
+```
 
 ---
 
-## 🔄 Complete Request Lifecycle (How Data Travels)
+## 🔧 Troubleshooting
 
-Let's follow a request from start to finish: **`POST /api/shipments`**
+### ❌ `prisma migrate deploy` fails
+- Make sure PostgreSQL is running and `DATABASE_URL` is correct in `backend/.env`
+- Verify database `shipment_db` exists: `psql -U postgres -c "\l"`
 
-1. **Client Sends Request**:
-   The client makes a `POST` request with header `Authorization: Bearer <token>` and JSON body:
-   ```json
-   {
-     "trackingNumber": "TRK-1001",
-     "customerId": "uuid-here",
-     "origin": "New York, NY",
-     "destination": "Los Angeles, CA"
-   }
-   ```
-2. **Global Middleware (`server.ts`)**:
-   - `cors()` verifies the sender's origin.
-   - `express.json()` parses the raw incoming byte stream into a JavaScript object (`req.body`).
-3. **Route Match (`shipment.routes.ts`)**:
-   - Express matches `POST /api/shipments` and enters the route's middleware chain.
-4. **Auth Middleware (`authenticateJwt`)**:
-   - Reads `req.headers.authorization`.
-   - Strips `"Bearer "` and calls `jwt.verify(token, JWT_SECRET)`.
-   - If invalid $\rightarrow$ returns `401 Unauthorized`.
-   - If valid $\rightarrow$ attaches decoded user payload to `req.user` and calls `next()`.
-5. **Validation Middleware (`validate(createShipmentSchema)`)**:
-   - Passes `req.body` into Zod's `createShipmentSchema.parse()`.
-   - Checks that `trackingNumber` is $\ge 3$ chars, `customerId` is a valid UUID, etc.
-   - If invalid $\rightarrow$ halts and returns `400 Bad Request` with field-level errors.
-   - If valid $\rightarrow$ replaces `req.body` with sanitized data and calls `next()`.
-6. **Controller (`shipment.controller.ts`)**:
-   - Receives clean data, calls `ShipmentService.createShipment(req.body)`.
-7. **Service (`shipment.service.ts`)**:
-   - Calls `prisma.shipment.create(...)` which generates SQL `INSERT`.
-   - Also creates the initial `ShipmentStatusHistory` record with status `PENDING`.
-8. **Response Envelope**:
-   - Controller sends back HTTP `201 Created` with standard format:
-     ```json
-     {
-       "success": true,
-       "message": "Shipment created successfully.",
-       "data": { ... }
-     }
-     ```
-9. **Centralized Error Handling (`error.middleware.ts`)**:
-   - If any step throws an error, Express forwards it to the global error handler.
-   - Prisma errors (e.g. duplicate tracking number `P2002`) are translated into friendly HTTP `409 Conflict` responses automatically.
-
----
-
-## 📡 API Endpoints Reference
-
-### 1. System Health
-| Method | URL | Description | Auth |
-|---|---|---|:---:|
-| `GET` | `/` | Welcome message | Public |
-| `GET` | `/health` | Live PostgreSQL connection health ping | Public |
-
-### 2. Authentication (`/api/auth`)
-| Method | URL | Description | Auth |
-|---|---|---|:---:|
-| `POST` | `/api/auth/register` | Register new user account | Public |
-| `POST` | `/api/auth/login` | Login and receive signed JWT (24h) | Public |
-| `GET` | `/api/auth/me` | Fetch currently logged-in user profile | Bearer Token |
-
-### 3. Customers (`/api/customers`)
-| Method | URL | Description | Auth |
-|---|---|---|:---:|
-| `POST` | `/api/customers` | Create new customer | Bearer Token |
-| `GET` | `/api/customers` | Get paginated customer list (`?page=1&limit=10&search=abc`) | Public |
-| `GET` | `/api/customers/:id` | Get customer details with all their shipments | Public |
-| `PUT` | `/api/customers/:id` | Update customer fields (name, company, status) | Bearer Token |
-| `DELETE`| `/api/customers/:id` | Soft delete customer (`isDeleted = true`) | Bearer Token |
-
-### 4. Shipments (`/api/shipments`)
-| Method | URL | Description | Auth |
-|---|---|---|:---:|
-| `POST` | `/api/shipments` | Create shipment & start audit history | Bearer Token |
-| `GET` | `/api/shipments` | List all shipments with customer summary | Public |
-| `GET` | `/api/shipments/:id` | Get shipment details with full audit trail | Public |
-| `PATCH`| `/api/shipments/:id/status`| Update status (atomic update + history log) | Bearer Token |
-
----
-
-## 🚀 Setup & Installation Guide
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18 or v20+)
-- [PostgreSQL](https://www.postgresql.org/) (running locally or in Docker on port `5432`)
-
-### 1. Clone & Install
+### ❌ Backend shows `Cannot find module '@prisma/client'`
 ```bash
 cd backend
+npx prisma generate
 npm install
 ```
 
-### 2. Environment Variables
-Create or verify `.env` inside `backend/`:
-```env
-PORT=5000
-DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/shipment_db?schema=public"
-JWT_SECRET="your_super_secret_jwt_key_for_production"
-```
+### ❌ AI service shows "Message cannot be empty" / no response
+- Verify the AI service is running: `http://localhost:5002/health`
+- Check that `GROQ_API_KEY` or `OPENAI_API_KEY` is set in `ai-service/.env`
 
-### 3. Database Migration & Seeding
-Push the Prisma schema to PostgreSQL and populate initial demo data:
+### ❌ AI service says "model not found"
+- The Groq model `llama-3.3-70b-versatile` may not be available on free tier.
+- Set `GROQ_MODEL=qwen/qwen3.8-27b` in `ai-service/.env`
+
+### ❌ `python ingest.py` fails with DB error
+- Ensure `DATABASE_URL` in `ai-service/.env` does **not** include `?schema=public`
+- Correct format: `postgresql://postgres:password@localhost:5432/shipment_db`
+
+### ❌ Frontend blank screen / API errors
+- Make sure the **backend** is running on port `5000` before starting the frontend
+- Check browser console for CORS errors — ensure `CORS` is enabled (it is by default)
+
+### ❌ `pip install` fails on Windows for `psycopg2-binary`
 ```bash
-# Apply schema to database
-npx prisma migrate deploy
-
-# (Optional) Generate Prisma types
-npx prisma generate
-
-# Seed sample users, customers, shipments, and sales data
-npm run seed
+pip install psycopg2-binary --only-binary :all:
 ```
 
-### 4. Run the Development Server
-```bash
-npm run dev
-```
-The server will boot on `http://localhost:5000` with hot-reload enabled (`tsx watch`).
+### ❌ Analytics service crashes on startup
+- Install `kaleido` separately if needed: `pip install kaleido`
+- On some systems: `pip install kaleido==0.2.1`
 
 ---
 
-## 🧪 Testing with Postman
+## 🤖 Getting a Free Groq API Key
 
-We have provided a pre-configured, importable Postman collection file:
-📁 **[`backend/postman_collection.json`](file:///e:/Shipment-Management-System/backend/postman_collection.json)**
+The AI assistant works best with a free Groq API key:
 
-### How to use:
-1. Open **Postman**.
-2. Click **Import** (top-left) $\rightarrow$ Select `postman_collection.json`.
-3. Open the **1.2 Login** request and click **Send**.
-4. ✨ **The collection automatically extracts and saves your JWT token** into collection variables, so all subsequent protected customer & shipment requests work automatically without manual copy-pasting!
-
----
-
-## 📂 Folder Structure
-
-```
-backend/
-├── prisma/
-│   ├── schema.prisma             # PostgreSQL schema definition & models
-│   ├── seed.ts                   # Initial seed data script
-│   └── migrations/               # SQL migration files
-├── src/
-│   ├── controllers/              # HTTP Request/Response handlers
-│   │   ├── auth.controller.ts
-│   │   ├── customer.controller.ts
-│   │   └── shipment.controller.ts
-│   ├── middlewares/              # Express middlewares
-│   │   ├── auth.middleware.ts    # JWT verification & role authorization
-│   │   ├── error.middleware.ts   # Centralized error handler & AppError
-│   │   └── validate.middleware.ts# Zod request validation
-│   ├── routes/                   # Endpoint definitions & router pipelines
-│   │   ├── auth.routes.ts
-│   │   ├── customer.routes.ts
-│   │   └── shipment.routes.ts
-│   ├── schemas/                  # Zod validation schemas
-│   │   ├── auth.schema.ts
-│   │   ├── customer.schema.ts
-│   │   └── shipment.schema.ts
-│   ├── services/                 # Business logic & Prisma ORM queries
-│   │   ├── auth.service.ts
-│   │   ├── customer.service.ts
-│   │   └── shipment.service.ts
-│   ├── lib/
-│   │   └── prisma.ts             # Prisma Client singleton
-│   ├── types/
-│   │   └── express.d.ts          # Custom Express Request type extension
-│   └── server.ts                 # Express application entrypoint
-├── postman_collection.json       # Pre-configured Postman testing suite
-├── package.json                  # Scripts & dependencies
-├── tsconfig.json                 # TypeScript compiler configuration
-└── .env                          # Environment secrets
-```
+1. Go to **[console.groq.com/keys](https://console.groq.com/keys)**
+2. Sign in with Google or GitHub (no credit card needed)
+3. Click **"Create API Key"**
+4. Copy the key (starts with `gsk_...`)
+5. Paste it in `ai-service/.env` as `GROQ_API_KEY=gsk_...`
+6. Restart the AI service
 
 ---
 
-*Authored for the Shipment Management System. Designed for high reliability, clean architecture, and rapid extensibility.*
+## 📄 License
+
+This project is built for educational and demonstration purposes.
+
+---
+
+<p align="center">
+  Built with ❤️ using React, Node.js, Python, PostgreSQL, and Groq AI
+</p>
