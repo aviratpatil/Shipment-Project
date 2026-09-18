@@ -298,7 +298,11 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ events, onClose, onClear })
 // Main NotificationToast Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const NotificationToast: React.FC = () => {
+interface NotificationToastProps {
+  onEvent?: (data: any) => void;
+}
+
+export const NotificationToast: React.FC<NotificationToastProps> = ({ onEvent }) => {
   const [toasts, setToasts] = useState<ShipmentEvent[]>([]);
   const [history, setHistory] = useState<ShipmentEvent[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -333,10 +337,33 @@ export const NotificationToast: React.FC = () => {
         ws.onmessage = (e) => {
           try {
             const data = JSON.parse(e.data);
+            onEvent?.(data);
             if (data.event === "shipment_status_changed") {
               const evt: ShipmentEvent = {
                 id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
                 ...data,
+              };
+              addToast(evt);
+            } else if (data.event === "truck_status_changed") {
+              const evt: ShipmentEvent = {
+                id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                event: "truck_status_changed",
+                shipmentId: data.truckId,
+                status: data.status,
+                trackingNumber: data.plateNumber,
+                customerName: `🚚 ${data.truckName} — Status: ${data.status}${data.shipmentsUpdated ? ` (${data.shipmentsUpdated} parcels updated)` : ""}`,
+                timestamp: data.timestamp,
+              };
+              addToast(evt);
+            } else if (data.event === "driver_shortage_alert") {
+              const evt: ShipmentEvent = {
+                id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                event: "driver_shortage_alert",
+                shipmentId: "shortage",
+                status: "SHORTAGE",
+                trackingNumber: undefined,
+                customerName: `⚠️ Driver Shortage! ${data.shortageCount} driver(s) needed — ${data.readyTrucks} trucks waiting`,
+                timestamp: data.timestamp,
               };
               addToast(evt);
             }

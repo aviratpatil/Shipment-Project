@@ -102,12 +102,16 @@ export const ChatBot: React.FC = () => {
 
       const data = await res.json();
 
+      // New API contract: { response: string, session_id: string }
+      const isError = !res.ok;
       const botMsg: Message = {
         id: `a_${Date.now()}`,
         role: "assistant",
-        content: data.success ? data.message : data.error ?? "Something went wrong.",
+        content: isError
+          ? (data.error ?? "Something went wrong. Please try again.")
+          : (data.response ?? "I received an empty response."),
         timestamp: new Date(),
-        isError: !data.success,
+        isError,
       };
 
       setMessages((prev) => [...prev, botMsg]);
@@ -119,7 +123,7 @@ export const ChatBot: React.FC = () => {
         {
           id: `err_${Date.now()}`,
           role: "assistant",
-          content: "⚠️ Could not reach the AI service. Make sure `ai-service` is running on port 5002.",
+          content: "⚠️ Could not reach ShipBot. Make sure the `ai-service` is running on port 5002.",
           timestamp: new Date(),
           isError: true,
         },

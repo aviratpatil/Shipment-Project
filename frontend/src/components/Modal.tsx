@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface ModalProps {
@@ -32,19 +33,25 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       style={{
         position: "fixed",
-        inset: 0,
-        zIndex: 1000,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: 9999,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px",
-        backgroundColor: "rgba(15, 23, 42, 0.4)",
-        backdropFilter: "blur(6px)",
-        WebkitBackdropFilter: "blur(6px)",
+        padding: "24px 16px",
+        backgroundColor: "rgba(15, 23, 42, 0.55)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        boxSizing: "border-box",
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -54,12 +61,16 @@ export const Modal: React.FC<ModalProps> = ({
         style={{
           width: "100%",
           maxWidth,
+          maxHeight: "calc(100vh - 48px)",
+          display: "flex",
+          flexDirection: "column",
           background: "#ffffff",
           border: "1px solid #e2e8f0",
           borderRadius: "20px",
-          boxShadow: "0 20px 50px -10px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04)",
-          animation: "modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both",
+          boxShadow: "0 25px 60px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.06)",
+          animation: "modalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both",
           overflow: "hidden",
+          margin: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -71,15 +82,17 @@ export const Modal: React.FC<ModalProps> = ({
             justifyContent: "space-between",
             padding: "20px 24px 16px",
             borderBottom: "1px solid var(--border)",
+            flexShrink: 0,
+            background: "#ffffff",
           }}
         >
           <h2
             style={{
               margin: 0,
-              fontSize: "16px",
+              fontSize: "17px",
               fontWeight: 700,
               color: "var(--text-primary)",
-              letterSpacing: "-0.2px",
+              letterSpacing: "-0.3px",
             }}
           >
             {title}
@@ -114,8 +127,17 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Body */}
-        <div style={{ padding: "24px" }}>{children}</div>
+        <div
+          style={{
+            padding: "24px",
+            overflowY: "auto",
+            flex: 1,
+          }}
+        >
+          {children}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

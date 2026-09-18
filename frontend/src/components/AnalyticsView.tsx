@@ -5,7 +5,6 @@ import {
   FileText,
   AlertCircle,
   CheckCircle2,
-  TrendingUp,
   Users,
   MapPin,
   DollarSign,
@@ -13,12 +12,7 @@ import {
   Download,
   Award,
   Search,
-  ChevronDown,
   Sparkles,
-  PieChart as PieIcon,
-  Layers,
-  ArrowUpRight,
-  Filter,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────

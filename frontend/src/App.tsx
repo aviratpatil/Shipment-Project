@@ -5,14 +5,19 @@ import { CustomersView } from "./components/CustomersView";
 import { ShipmentsView } from "./components/ShipmentsView";
 import { LoginView } from "./components/LoginView";
 import { AnalyticsView } from "./components/AnalyticsView";
+import { FleetView } from "./components/FleetView";
+import { ManifestView } from "./components/ManifestView";
+import { DriverPortal } from "./components/DriverPortal";
 import { ChatBot } from "./components/ChatBot";
 import { NotificationToast } from "./components/NotificationToast";
 import { apiRequest } from "./api/client";
 import type { Customer, Shipment, User } from "./types";
 import { Loader2 } from "lucide-react";
 
+type AppTab = "dashboard" | "customers" | "shipments" | "analytics" | "fleet" | "manifest";
+
 export function App() {
-  const [currentTab, setCurrentTab] = useState<"dashboard" | "customers" | "shipments" | "analytics">("dashboard");
+  const [currentTab, setCurrentTab] = useState<AppTab>("dashboard");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -61,18 +66,30 @@ export function App() {
     fetchProfile().finally(() => setIsLoading(false));
   }, [checkHealth, fetchProfile]);
 
-  // Fetch data once user is authenticated
   useEffect(() => {
     if (currentUser) {
       fetchData();
     }
   }, [currentUser, fetchData]);
 
+  const handleWsEvent = useCallback(
+    (data: any) => {
+      if (data.event === "shipment_status_changed") {
+        setShipments((prev) =>
+          prev.map((s) => (s.id === data.shipmentId ? { ...s, status: data.status } : s))
+        );
+        fetchData();
+      } else if (data.event === "truck_status_changed") {
+        fetchData();
+      }
+    },
+    [fetchData]
+  );
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     setCurrentUser(null);
     setCurrentTab("dashboard");
-    // Clear app data on logout for security
     setCustomers([]);
     setShipments([]);
   };
@@ -133,11 +150,10 @@ export function App() {
     );
   }
 
-  // ── Not authenticated → show full-page Login/Register view ─────────────────
+  // ── Not authenticated → show Login ─────────────────────────────────────────
   if (!currentUser) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "var(--bg-base)" }}>
-        {/* Minimal header for unauthenticated users */}
         <header
           style={{
             position: "sticky",
@@ -190,7 +206,17 @@ export function App() {
     );
   }
 
-  // ── Authenticated → show full dashboard ────────────────────────────────────
+  // ── DRIVER role → show dedicated Driver Portal ─────────────────────────────
+  if (currentUser.role === "DRIVER") {
+    return (
+      <>
+        <DriverPortal currentUser={currentUser} onLogout={handleLogout} />
+        <NotificationToast onEvent={handleWsEvent} />
+      </>
+    );
+  }
+
+  // ── Authenticated ADMIN/USER → full dashboard ──────────────────────────────
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar
@@ -237,6 +263,18 @@ export function App() {
             onOpenAuth={() => {}}
           />
         )}
+        {currentTab === "fleet" && (
+          <FleetView
+            currentUser={currentUser}
+            onOpenManifest={() => setCurrentTab("manifest")}
+          />
+        )}
+        {currentTab === "manifest" && (
+          <ManifestView
+            currentUser={currentUser}
+            onBack={() => setCurrentTab("fleet")}
+          />
+        )}
         {currentTab === "analytics" && <AnalyticsView />}
       </main>
 
@@ -254,11 +292,11 @@ export function App() {
         ShipmentPro &copy; {new Date().getFullYear()} · Logistics Management Platform
       </footer>
 
-      {/* Module 4 – AI Chatbot (global floating widget) */}
+      {/* Module 4 – AI Chatbot */}
       <ChatBot />
 
       {/* Module 5 – Real-time WebSocket notifications */}
-      <NotificationToast />
+      <NotificationToast onEvent={handleWsEvent} />
     </div>
   );
 }

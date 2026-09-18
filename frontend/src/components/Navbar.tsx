@@ -8,12 +8,14 @@ import {
   Shield,
   ChevronDown,
   BarChart3,
+  Truck,
+  ClipboardList,
 } from "lucide-react";
 import type { User } from "../types";
 
 interface NavbarProps {
-  currentTab: "dashboard" | "customers" | "shipments" | "analytics";
-  onTabChange: (tab: "dashboard" | "customers" | "shipments" | "analytics") => void;
+  currentTab: "dashboard" | "customers" | "shipments" | "analytics" | "fleet" | "manifest";
+  onTabChange: (tab: "dashboard" | "customers" | "shipments" | "analytics" | "fleet" | "manifest") => void;
   currentUser: User | null;
   onLogout: () => void;
   onOpenAuth: () => void;
@@ -23,6 +25,8 @@ const NAV_ITEMS = [
   { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
   { id: "customers" as const, label: "Customers", icon: Users },
   { id: "shipments" as const, label: "Shipments", icon: Package },
+  { id: "fleet" as const, label: "Fleet", icon: Truck },
+  { id: "manifest" as const, label: "Manifest", icon: ClipboardList },
   { id: "analytics" as const, label: "Analytics", icon: BarChart3 },
 ];
 
@@ -200,13 +204,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <Shield
                       size={10}
-                      color={currentUser.role === "ADMIN" ? "#7c3aed" : "#2563eb"}
+                      color={currentUser.role === "ADMIN" ? "#7c3aed" : currentUser.role === "DRIVER" ? "#16a34a" : "#2563eb"}
                     />
                     <span
                       style={{
                         fontSize: "10px",
                         fontWeight: 700,
-                        color: currentUser.role === "ADMIN" ? "#7c3aed" : "#2563eb",
+                        color: currentUser.role === "ADMIN" ? "#7c3aed" : currentUser.role === "DRIVER" ? "#16a34a" : "#2563eb",
                         letterSpacing: "0.04em",
                       }}
                     >

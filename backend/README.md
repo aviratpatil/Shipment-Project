@@ -273,6 +273,16 @@ Let's follow a request from start to finish: **`POST /api/shipments`**
 
 ## 🚀 Setup & Installation Guide
 
+### 🔑 Pre-Seeded Accounts (Password: `password123`)
+Running `npm run seed` creates the following ready-to-use user accounts:
+
+| Role | Email | Password | Description |
+|---|---|---|---|
+| `ADMIN` | `admin@system.com` | `password123` | System Administrator |
+| `DRIVER` | `driver1@system.com` | `password123` | Driver 1 (Michael Vance - Truck TRK-8821-NY) |
+| `DRIVER` | `driver2@system.com` | `password123` | Driver 2 (Sarah Jenkins - Truck TRK-4019-TX) |
+| `DRIVER` | `driver3@system.com` | `password123` | Driver 3 (David Rodriguez - Truck TRK-1092-GA) |
+
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18 or v20+)
 - [PostgreSQL](https://www.postgresql.org/) (running locally or in Docker on port `5432`)
@@ -292,15 +302,12 @@ JWT_SECRET="your_super_secret_jwt_key_for_production"
 ```
 
 ### 3. Database Migration & Seeding
-Push the Prisma schema to PostgreSQL and populate initial demo data:
+Push the Prisma schema to PostgreSQL and populate initial demo data (7 Shipments, 3 Drivers, 4 Trucks, 5 Customers, Audit Logs, Sales data):
 ```bash
 # Apply schema to database
-npx prisma migrate deploy
+npx prisma migrate dev
 
-# (Optional) Generate Prisma types
-npx prisma generate
-
-# Seed sample users, customers, shipments, and sales data
+# Seed sample users, drivers, trucks, customers, shipments, and sales data
 npm run seed
 ```
 

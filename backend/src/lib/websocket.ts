@@ -14,7 +14,25 @@ export interface ShipmentStatusEvent {
   timestamp: string;
 }
 
-export type WsEvent = ShipmentStatusEvent;
+export interface TruckStatusEvent {
+  event: "truck_status_changed";
+  truckId: string;
+  truckName: string;
+  plateNumber: string;
+  status: string;
+  shipmentsUpdated?: number;
+  timestamp: string;
+}
+
+export interface DriverShortageEvent {
+  event: "driver_shortage_alert";
+  shortageCount: number;
+  readyTrucks: number;
+  availableDrivers: number;
+  timestamp: string;
+}
+
+export type WsEvent = ShipmentStatusEvent | TruckStatusEvent | DriverShortageEvent;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Singleton WS Server reference

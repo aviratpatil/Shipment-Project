@@ -1,4 +1,7 @@
 flask
 flask-cors
-groq
+openai
+psycopg2-binary
+pgvector
+requests
 python-dotenv

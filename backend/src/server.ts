@@ -9,6 +9,8 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import authRoutes from "./routes/auth.routes";
 import customerRoutes from "./routes/customer.routes";
 import shipmentRoutes from "./routes/shipment.routes";
+import truckRoutes from "./routes/truck.routes";
+import driverRoutes from "./routes/driver.routes";
 
 // Load environment variables from .env
 dotenv.config();
@@ -62,6 +64,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/shipments", shipmentRoutes);
 
+// Fleet & Driver Management
+app.use("/api/trucks", truckRoutes);
+app.use("/api/drivers", driverRoutes);
+
 // 404 handler for unknown routes
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: "Route not found." });
@@ -92,6 +98,8 @@ async function startServer() {
       console.log(`🔐 Auth:         http://localhost:${PORT}/api/auth`);
       console.log(`👥 Customers:    http://localhost:${PORT}/api/customers`);
       console.log(`📦 Shipments:    http://localhost:${PORT}/api/shipments`);
+      console.log(`🚚 Trucks:       http://localhost:${PORT}/api/trucks`);
+      console.log(`🧑‍✈️ Drivers:      http://localhost:${PORT}/api/drivers`);
       console.log(`🔌 WebSocket:    ws://localhost:${PORT}/ws`);
     });
   } catch (error) {
